@@ -34,15 +34,21 @@ options:
     description:
       tipo de diff a ejecutar.
     required: false
+    choices:
+      - config: ejecuta Diff, analiza lines to add y lines to remove contra Config Master
+      - context: ejecuta Diff, analiza solo lines in context contra Config Master
     type: string
   match_type:
     description:
       tipo de match que el algorithm Diff ejecutara (type_diff=context)
     required: false
+    choices:
+      - full: Diff algorithm verifica que las lineas del Contexto existan exactamente en Device Configuracion
+      - include: Diff algorithm verifica que las lineas de Contexto esten inlcuidas en Device Configuracion
     type: string
   lines_in_context:
     description:
-      cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@
+      "cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@"
     required: false
     type: string
 """
