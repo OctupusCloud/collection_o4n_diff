@@ -6,32 +6,50 @@ from __future__ import print_function, unicode_literals
 DOCUMENTATION = """
 ---
 module: o4n_diff
-version_added: "3.0"
-author: "Ed Scrimaglia"
-short_description: Realiza un diff de dos archivos. 
+short_description: Ejecuta algoritmo Diff para analizar compliances. 
 description:
   - ejecuta algorintmo Diff para configuraciones o bloques de comandos (contexts)
   - muestra las lineas que fueron agregadas o eliminadas
   - muestra las lineas que hay que agregar o eliminar
+version_added: "3.0"
+author: "Ed Scrimaglia"
+notes:
+  - Testeado en linux
+requirements:
+  - ansible >= 2.10
 options:
     original:
-        description: archivo origen o master config a comparar
+        description:
+            archivo origen o master config a comparar
+        required: true
+        type: string
     current:
-        description: archivo actual, config file o config context, a comparar contra original
+        description:
+            archivo actual, config file o config context, a comparar contra original
+        required: true
+        type: string
     type_diff:
-        description: tipo de diff a ejecutar.
+        description: 
+            tipo de diff a ejecutar.
+        required: false
         default: config
         values: 
             config: ejecuta Diff, analiza lines to add y lines to remove contra Config Master
             context: ejecuta Diff, analiza solo lines in context contra Config Master
     match_type:
-        description: tipo de match que el algorithm Diff ejecutara (type_diff=context)
+        description: 
+            tipo de match que el algorithm Diff ejecutara (type_diff=context)
+        required: false
         default: full
         values:
             full: Diff algorithm verifica que las lineas del Contexto existan exactamente en Device Configuracion 
             include: Diff algorithm verifica que las lineas de Contexto esten inlcuidas en Device Configuracion
     lines_in_context:
-        cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@
+        description:
+            "cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@"
+        required: false
+        type: string
+        
 """
 
 RETURN = """
