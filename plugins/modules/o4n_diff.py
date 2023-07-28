@@ -34,17 +34,11 @@ options:
     description:
       tipo de diff a ejecutar.
     required: false
-    choices:
-      - config
-      - context
     type: string
   match_type:
     description:
       tipo de match que el algorithm Diff ejecutara (type_diff=context)
     required: false
-    choices:
-      - full
-      - include
     type: string
   lines_in_context:
     description:
