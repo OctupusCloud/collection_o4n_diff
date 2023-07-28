@@ -44,6 +44,7 @@ tasks:
         lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
     register: salidadiff
 
+tasks:
   - name: Oction Diff Files
     o4n_diff:
         original: "./backup/\{\{ inventory_hostname }}.mongo"
@@ -53,6 +54,7 @@ tasks:
         lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
     register: salidadiff
 
+tasks:
   - name: Oction Diff Files
     o4n_diff:
         original: "./backup/\{\{ inventory_hostname }}.mongo"
