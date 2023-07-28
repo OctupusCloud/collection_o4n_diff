@@ -20,33 +20,33 @@ requirements:
 options:
     original:
         description:
-            archivo origen o master config a comparar
+          archivo origen o master config a comparar
         required: true
         type: string
     current:
         description:
-            archivo actual, config file o config context, a comparar contra original
+          archivo actual, config file o config context, a comparar contra original
         required: true
         type: string
     type_diff:
         description: 
-            tipo de diff a ejecutar.
+          tipo de diff a ejecutar.
         required: false
         default: config
         values: 
-            config: ejecuta Diff, analiza lines to add y lines to remove contra Config Master
-            context: ejecuta Diff, analiza solo lines in context contra Config Master
+          - config: ejecuta Diff, analiza lines to add y lines to remove contra Config Master
+          - context: ejecuta Diff, analiza solo lines in context contra Config Master
     match_type:
         description: 
-            tipo de match que el algorithm Diff ejecutara (type_diff=context)
+          tipo de match que el algorithm Diff ejecutara (type_diff=context)
         required: false
         default: full
         values:
-            full: Diff algorithm verifica que las lineas del Contexto existan exactamente en Device Configuracion 
-            include: Diff algorithm verifica que las lineas de Contexto esten inlcuidas en Device Configuracion
+          - full: Diff algorithm verifica que las lineas del Contexto existan exactamente en Device Configuracion 
+          - include: Diff algorithm verifica que las lineas de Contexto esten inlcuidas en Device Configuracion
     lines_in_context:
         description:
-            "cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@"
+          "cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@"
         required: false
         type: string
         
