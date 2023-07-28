@@ -12,4 +12,4 @@ Ansible >= 2.10
 ## Modules
 
 o4n_diff
-displays the output of the diff itself (diff) and the lines that were added or deleted (Different_lines)
+The collection allow to find and displays the differences between two files in the context of configurartions compliance. The module works either for whole configurations (config) or a block of sentences (context).  
