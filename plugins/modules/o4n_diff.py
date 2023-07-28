@@ -64,13 +64,14 @@ output:
             "changed": false,
             "content": {
                 "Diff_Results": {
-                    "diff": "--- original\n+++ current\n@@ -36,12 +36,12 @@\n !\n !\n spanning-tree mode pvst\n-spanning-tree extend system-id\n 
-                      !\n+interface loopback 0\n+ ip address 10.54.1.1 255.255.255.0\n+\n 
-                      interface GigabitEthernet0/0\n  no switchport\n- ip address 10.54.154.151 255.255.255.224\n- 
+                    "diff": "--- original\n+++ current\n@@ -36,12 +36,12 @@\n !\n !\n spanning-tree mode pvst\n-spanning-tree extend system-id\n
+                      !\n+interface loopback 0\n+ ip address 10.54.1.1 255.255.255.0\n+\n
+                      interface GigabitEthernet0/0\n  no switchport\n- ip address 10.54.154.151 255.255.255.224\n-
                       negotiation auto\n !\n interface GigabitEthernet0/1\n  switchport trunk allowed vlan 1,3-4094",
                     "lines_to_delete": "interface loopback 0\n ip address 10.54.1.1 255.255.255.0\n",
                     "lines_to_add": "spanning-tree extend system-id\n ip address 10.54.154.151 255.255.255.224\n negotiation auto",
-                    "block_to_add": "spanning-tree extend system-id\ninterface GigabitEthernet0/0\n ip address 10.54.154.151 255.255.255.224\n negotiation auto",
+                    "block_to_add": "spanning-tree extend system-id\ninterface GigabitEthernet0/0\n ip address 10.54.154.151 255.255.255.224\n
+                      negotiation auto",
                     "block_to_del": "interface loopback 0\n ip address 10.54.1.1 255.255.255.0"
                 },
                 "Total_execution_time": "0:00:00.000876"
@@ -138,7 +139,7 @@ EXAMPLES = """
 tasks:
   - name: Oction Diff Files
     o4n_diff:
-      original: "./backup/\{\{ inventory_hostname }}.mongo"
+      original: "./backup/{{inventory_hostname}}.mongo"
       current: "./backup/{{inventory_hostname}}.config"
       type_diff: config
       lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
@@ -146,7 +147,7 @@ tasks:
 
   - name: Oction Diff Files
     o4n_diff:
-      original: "./backup/\{\{ inventory_hostname }}.mongo"
+      original: "./backup/{{ inventory_hostname }}.mongo"
       current: "./backup/{{inventory_hostname}}_context.master"
       type_diff: context
       match_type: full
@@ -155,7 +156,7 @@ tasks:
 
   - name: Oction Diff Files
     o4n_diff:
-      original: "./backup/\{\{ inventory_hostname }}.mongo"
+      original: "./backup/{{ inventory_hostname }}.mongo"
       current: "./backup/{{inventory_hostname}}_context.master"
       ype_diff: context
       match_type: include
