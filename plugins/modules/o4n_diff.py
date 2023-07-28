@@ -3,6 +3,8 @@
 
 from __future__ import print_function, unicode_literals
 
+__metaclass__ = type
+
 DOCUMENTATION = """
 ---
 module: o4n_diff
@@ -18,38 +20,37 @@ notes:
 requirements:
   - ansible >= 2.10
 options:
-    original:
-        description:
-          archivo origen o master config a comparar
-        required: true
-        type: string
-    current:
-        description:
-          archivo actual, config file o config context, a comparar contra original
-        required: true
-        type: string
-    type_diff:
-        description:
-          tipo de diff a ejecutar.
-        required: false
-        choices:
-          - config: ejecuta Diff, analiza lines to add y lines to remove contra Config Master
-          - context: ejecuta Diff, analiza solo lines in context contra Config Master
-        type: string
-    match_type:
-        description:
-          tipo de match que el algorithm Diff ejecutara (type_diff=context)
-        required: false
-        choices:
-          - full: Diff algorithm verifica que las lineas del Contexto existan exactamente en Device Configuracion
-          - include: Diff algorithm verifica que las lineas de Contexto esten inlcuidas en Device Configuracion
-        type: string
-    lines_in_context:
-        description:
-          cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@
-        required: false
-        type: string
-        
+  original:
+    description:
+      archivo origen o master config a comparar
+    required: true
+    type: string
+  current:
+    description:
+      archivo actual, config file o config context, a comparar contra original
+    required: true
+    type: string
+  type_diff:
+    description:
+      tipo de diff a ejecutar.
+    required: false
+    choices:
+      - config: ejecuta Diff, analiza lines to add y lines to remove contra Config Master
+      - context: ejecuta Diff, analiza solo lines in context contra Config Master
+    type: string
+  match_type:
+    description:
+      tipo de match que el algorithm Diff ejecutara (type_diff=context)
+    required: false
+    choices:
+      - full: Diff algorithm verifica que las lineas del Contexto existan exactamente en Device Configuracion
+      - include: Diff algorithm verifica que las lineas de Contexto esten inlcuidas en Device Configuracion
+    type: string
+  lines_in_context:
+    description:
+      cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@
+    required: false
+    type: string
 """
 
 RETURN = """
@@ -63,7 +64,10 @@ output:
             "changed": false,
             "content": {
                 "Diff_Results": {
-                    "diff": "--- original\n+++ current\n@@ -36,12 +36,12 @@\n !\n !\n spanning-tree mode pvst\n-spanning-tree extend system-id\n !\n+interface loopback 0\n+ ip address 10.54.1.1 255.255.255.0\n+\n interface GigabitEthernet0/0\n  no switchport\n- ip address 10.54.154.151 255.255.255.224\n- negotiation auto\n !\n interface GigabitEthernet0/1\n  switchport trunk allowed vlan 1,3-4094",
+                    "diff": "--- original\n+++ current\n@@ -36,12 +36,12 @@\n !\n !\n spanning-tree mode pvst\n-spanning-tree extend system-id\n 
+                      !\n+interface loopback 0\n+ ip address 10.54.1.1 255.255.255.0\n+\n 
+                      interface GigabitEthernet0/0\n  no switchport\n- ip address 10.54.154.151 255.255.255.224\n- 
+                      negotiation auto\n !\n interface GigabitEthernet0/1\n  switchport trunk allowed vlan 1,3-4094",
                     "lines_to_delete": "interface loopback 0\n ip address 10.54.1.1 255.255.255.0\n",
                     "lines_to_add": "spanning-tree extend system-id\n ip address 10.54.154.151 255.255.255.224\n negotiation auto",
                     "block_to_add": "spanning-tree extend system-id\ninterface GigabitEthernet0/0\n ip address 10.54.154.151 255.255.255.224\n negotiation auto",
@@ -134,30 +138,28 @@ EXAMPLES = """
 tasks:
   - name: Oction Diff Files
     o4n_diff:
-        original: "./backup/\{\{ inventory_hostname }}.mongo"
-        current: "./backup/{{inventory_hostname}}.config"
-        type_diff: config
-        lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
-    register: salidadiff
+      original: "./backup/\{\{ inventory_hostname }}.mongo"
+      current: "./backup/{{inventory_hostname}}.config"
+      type_diff: config
+      lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
+       register: salidadiff
 
-tasks:
   - name: Oction Diff Files
     o4n_diff:
-        original: "./backup/\{\{ inventory_hostname }}.mongo"
-        current: "./backup/{{inventory_hostname}}_context.master"
-        type_diff: context
-        match_type: full
-        lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
-    register: salidadiff
+      original: "./backup/\{\{ inventory_hostname }}.mongo"
+      current: "./backup/{{inventory_hostname}}_context.master"
+      type_diff: context
+      match_type: full
+      lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
+      register: salidadiff
 
-tasks:
   - name: Oction Diff Files
     o4n_diff:
-        original: "./backup/\{\{ inventory_hostname }}.mongo"
-        current: "./backup/{{inventory_hostname}}_context.master"
-        type_diff: context
-        match_type: include
-        lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
+      original: "./backup/\{\{ inventory_hostname }}.mongo"
+      current: "./backup/{{inventory_hostname}}_context.master"
+      ype_diff: context
+      match_type: include
+      lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
     register: salidadiff
 """
 
