@@ -55,7 +55,7 @@ options:
 
 RETURN = """
 output:
-  description: Retorna un objeto JSON cuyo conteniendo sigue uno de los siguientes formato (ejemplo)
+  description: Retorna un objeto JSON cuyo conteniendo sigue uno de los siguientes formatos
   type: dict
   returned: allways
   sample:
@@ -205,7 +205,7 @@ def open_files(_original, _current):
     return str1, str2, success_origin_current, ret_msg
 
 
-def find_block_of_config_to_modify(_block = "", _lines_to_add="", _lines_to_delete = ""):
+def find_block_of_config_to_modify(_block="", _lines_to_add="", _lines_to_delete=""):
     ret_msg = ""
     block_list = _block.splitlines() if _block else []
     new_block_list = [i for i in block_list if not i.startswith("---")] if len(block_list) > 0 else []
@@ -306,8 +306,8 @@ def find_context_diff(_str1: list, _str2: list, _context_name: str, _match_type:
     salida_json = OrderedDict()
     try:
         diff = difflib.unified_diff(_str1, _str2, fromfile='original', tofile='current', n=_lines_in_context, lineterm='')
-        lines_to_add_config_file = [ele for ele in diff if not ele.startswith("-") and not ele.startswith("+++ current") \
-            and ele.startswith("+")]
+        lines_to_add_config_file = [ele for ele in diff if not ele.startswith("-") and not ele.startswith("+++ current")
+        and ele.startswith("+")]
         salida_json['match_type'] = _match_type
         salida_json['context_name'] = _context_name
         salida_json['original_context'] = _str2
