@@ -34,37 +34,6 @@ options:
         cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@
 """
 
-EXAMPLES = """
-tasks:
-  - name: Oction Diff Files
-    o4n_diff:
-        original: "./backup/\{\{ inventory_hostname }}.mongo"
-        current: "./backup/{{inventory_hostname}}.config"
-        type_diff: config
-        lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
-    register: salidadiff
-
-tasks:
-  - name: Oction Diff Files
-    o4n_diff:
-        original: "./backup/\{\{ inventory_hostname }}.mongo"
-        current: "./backup/{{inventory_hostname}}_context.master"
-        type_diff: context
-        match_type: full
-        lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
-    register: salidadiff
-
-tasks:
-  - name: Oction Diff Files
-    o4n_diff:
-        original: "./backup/\{\{ inventory_hostname }}.mongo"
-        current: "./backup/{{inventory_hostname}}_context.master"
-        type_diff: context
-        match_type: include
-        lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
-    register: salidadiff
-"""
-
 RETURN = """
 output:
   description: Retorna un objeto JSON cuyo conteniendo sigue uno de los siguientes formato (ejemplo)
@@ -141,6 +110,37 @@ output:
             }
         }
     }
+"""
+
+EXAMPLES = """
+tasks:
+  - name: Oction Diff Files
+    o4n_diff:
+        original: "./backup/\{\{ inventory_hostname }}.mongo"
+        current: "./backup/{{inventory_hostname}}.config"
+        type_diff: config
+        lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
+    register: salidadiff
+
+tasks:
+  - name: Oction Diff Files
+    o4n_diff:
+        original: "./backup/\{\{ inventory_hostname }}.mongo"
+        current: "./backup/{{inventory_hostname}}_context.master"
+        type_diff: context
+        match_type: full
+        lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
+    register: salidadiff
+
+tasks:
+  - name: Oction Diff Files
+    o4n_diff:
+        original: "./backup/\{\{ inventory_hostname }}.mongo"
+        current: "./backup/{{inventory_hostname}}_context.master"
+        type_diff: context
+        match_type: include
+        lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
+    register: salidadiff
 """
 
 # Modulos
