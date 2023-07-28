@@ -142,7 +142,7 @@ tasks:
       original: "./backup/{{inventory_hostname}}.mongo"
       current: "./backup/{{inventory_hostname}}.config"
       type_diff: config
-      lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
+      lines_in_context: "{{Service_Model.Diff_Context.lines}}"
        register: salidadiff
 
   - name: Oction Diff Files
@@ -151,7 +151,7 @@ tasks:
       current: "./backup/{{inventory_hostname}}_context.master"
       type_diff: context
       match_type: full
-      lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
+      lines_in_context: "{{Service_Model.Diff_Context.lines}}"
       register: salidadiff
 
   - name: Oction Diff Files
@@ -160,7 +160,7 @@ tasks:
       current: "./backup/{{inventory_hostname}}_context.master"
       ype_diff: context
       match_type: include
-      lines_in_context: "{{Service_Model.Diff_Context.lines}}" 
+      lines_in_context: "{{Service_Model.Diff_Context.lines}}"
     register: salidadiff
 """
 
@@ -169,7 +169,7 @@ from ansible.module_utils.basic import AnsibleModule
 from datetime import datetime
 from collections import OrderedDict
 import difflib
-import json
+
 
 def open_files(_original, _current):
     str2 = ""
@@ -205,11 +205,11 @@ def open_files(_original, _current):
     return str1, str2, success_origin_current, ret_msg
 
 
-def find_block_of_config_to_modify(_block="", _lines_to_add="",_lines_to_delete=""):
+def find_block_of_config_to_modify(_block = "", _lines_to_add="", _lines_to_delete = ""):
     ret_msg = ""
     block_list = _block.splitlines() if _block else []
-    new_block_list = [i for i in block_list if not i.startswith("---")] if len(block_list) >0 else []
-    new_block_list = [i for i in new_block_list if not i.startswith("+++")] if len(new_block_list) >0 else []
+    new_block_list = [i for i in block_list if not i.startswith("---")] if len(block_list) > 0 else []
+    new_block_list = [i for i in new_block_list if not i.startswith("+++")] if len(new_block_list) > 0 else []
     tuplas_new_block_list = list(enumerate((new_block_list)))
 
     # finding the mayor line in line_to_add (line not indented)
@@ -306,7 +306,7 @@ def find_context_diff(_str1: list, _str2: list, _context_name: str, _match_type:
     salida_json = OrderedDict()
     try:
         diff = difflib.unified_diff(_str1, _str2, fromfile='original', tofile='current', n=_lines_in_context, lineterm='')
-        lines_to_add_config_file = [ele for ele in diff if not ele.startswith("-") and not ele.startswith("+++ current")
+        lines_to_add_config_file = [ele for ele in diff if not ele.startswith("-") and not ele.startswith("+++ current") \
             and ele.startswith("+")]
         salida_json['match_type'] = _match_type
         salida_json['context_name'] = _context_name
@@ -357,8 +357,8 @@ def main():
         argument_spec=dict(
             original=dict(required=True),
             current=dict(requiered=True),
-            type_diff=dict(requiered=False, type="str", choices=["config","context"], default="config"),
-            match_type=dict(requiered=False, type="str", choices=["include","full"], default="full"),
+            type_diff=dict(requiered=False, type="str", choices=["config", "context"], default="config"),
+            match_type=dict(requiered=False, type="str", choices=["include", "full"], default="full"),
             lines_in_context=dict(requiered=False,  type="str", default="3")
         )
     )
@@ -366,8 +366,8 @@ def main():
     current = module.params.get("current")
     type_diff = module.params.get("type_diff")
     match_type = module.params.get("match_type")
-    lines_in_context=int(module.params.get("lines_in_context"))
-    
+    lines_in_context = int(module.params.get("lines_in_context"))
+
     # Open Files
     config_orig, config_current, success_origin_current, ret_msg = open_files(original, current)
 
@@ -376,7 +376,7 @@ def main():
         starttime = datetime.now()
         salida_ansible = OrderedDict()
         if type_diff.lower() == "config":
-            salida, success, ret_msg = find_config_diff(config_orig, config_current,lines_in_context)
+            salida, success, ret_msg = find_config_diff(config_orig, config_current, lines_in_context)
             # Blocks to modify
             if success:
                 salida_ansible["Diff_Results"] = salida
@@ -390,7 +390,7 @@ def main():
                 salida_ansible['Diff_Results']['lines_to_add'] = '\n'.join([cmd[1] for cmd in lines_to_add_snd]) if \
                     len(salida_ansible['Diff_Results']['lines_to_add']) > 0 else False
                 salida_ansible['Diff_Results']['lines_to_delete'] = '\n'.join([cmd[1] for cmd in lines_to_del_snd]) if \
-                    len(salida_ansible['Diff_Results']['lines_to_delete'])> 0 else False
+                    len(salida_ansible['Diff_Results']['lines_to_delete']) > 0 else False
                 salida_ansible['Diff_Results']['block_to_add'] = block_lines_to_add
                 salida_ansible['Diff_Results']['block_to_del'] = block_lines_to_del
                 salida_ansible["Total_execution_time"] = f"{datetime.now() - starttime}"
@@ -410,5 +410,7 @@ def main():
                 module.fail_json(msg=ret_msg)
     else:
         module.fail_json(msg=ret_msg)
+
+
 if __name__ == "__main__":
     main()
