@@ -125,6 +125,7 @@ def open_files(_original, _current):
 
 def find_block_of_config_to_modify(_block="", _lines_to_add="", _lines_to_delete=""):
     ret_msg = ""
+    list_char_ignore = ["!","#"]
     block_list = _block.splitlines() if _block else []
     new_block_list = [i for i in block_list if not i.startswith("---")] if len(block_list) > 0 else []
     new_block_list = [i for i in new_block_list if not i.startswith("+++")] if len(new_block_list) > 0 else []
@@ -140,11 +141,13 @@ def find_block_of_config_to_modify(_block="", _lines_to_add="", _lines_to_delete
             ind_in_bloc = line_in_block[0]
             cmd_in_block = line_in_block[1]
             cmd_in_block_mod = cmd_in_block.replace(cmd_in_block[0], "", 1)
-            if cmd_in_block_mod[0] != " " and "!" not in cmd_in_block_mod:
+            cmd_in_block_mod_list = [char for char in cmd_in_block_mod if char]
+            exist_ignored_char = [ele for ele in list_char_ignore if ele in cmd_in_block_mod_list]
+            if cmd_in_block_mod[0] != " " and len(exist_ignored_char) == 0:
                 if mayor_line_not_indented != cmd_in_block_mod:
                     new_lines_to_add.append(cmd_in_block)
                     mayor_line_not_indented = cmd_in_block_mod
-            elif "!" not in cmd_in_block_mod:
+            elif len(exist_ignored_char) == 0:
                 for line in tuplas_new_block_list[ind_in_bloc::-1]:
                     cmd_line = line[1]
                     cmd_line_mod = cmd_line.replace(cmd_line[0], "", 1)
@@ -169,11 +172,13 @@ def find_block_of_config_to_modify(_block="", _lines_to_add="", _lines_to_delete
             ind_in_bloc = line_in_block[0]
             cmd_in_block = line_in_block[1]
             cmd_in_block_mod = cmd_in_block.replace(cmd_in_block[0], "", 1)
-            if cmd_in_block_mod[0] != " " and "!" not in cmd_in_block_mod:
+            cmd_in_block_mod_list = [char for char in cmd_in_block_mod if char]
+            exist_ignored_char = [ele for ele in list_char_ignore if ele in cmd_in_block_mod_list]
+            if cmd_in_block_mod[0] != " " and len(exist_ignored_char) == 0:
                 if mayor_line_not_indented != cmd_in_block_mod:
                     new_lines_to_del.append(cmd_in_block)
                     mayor_line_not_indented = cmd_in_block_mod
-            elif "!" not in cmd_in_block_mod:
+            elif len(exist_ignored_char) == 0:
                 for line in tuplas_new_block_list[ind_in_bloc::-1]:
                     cmd_line = line[1]
                     cmd_line_mod = cmd_line.replace(cmd_line[0], "", 1)
