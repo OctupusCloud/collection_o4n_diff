@@ -43,14 +43,20 @@ options:
       tipo de match que el algorithm Diff ejecutara (type_diff=context)
     required: false
     choices:
-      - full: Diff algorithm verifica que las lineas del Contexto existan exactamente en Device Configuracion
-      - include: Diff algorithm verifica que las lineas de Contexto esten inlcuidas en Device Configuracion
+      - full: Diff algorithm verifica que las lineas del Contexto existan exactamente en Device Configuration
+      - include: Diff algorithm verifica que las lineas de Contexto esten inlcuidas en Device Configuration
+      - var: Diffios algorithm verifica que las lineas de Contexto esten incluidas en Device Configuration, pueden incluirse variables en la comparacion
     type: string
   lines_in_context:
     description:
       "cantidad de lineas que apareceran en el bloque contexto formado por @@ -XY, +XY @@"
     required: false
     type: string
+  list_char_ignore:
+    description:
+      "lista con caracteres especiales a ignorar en la comparación"
+    required: false
+    type: list
 """
 
 EXAMPLES = """
@@ -76,8 +82,18 @@ tasks:
     o4n_diff:
       original: "./backup/{{ inventory_hostname }}.mongo"
       current: "./backup/{{inventory_hostname}}_context.master"
-      ype_diff: context
+      type_diff: context
       match_type: include
+      lines_in_context: "{{Service_Model.Diff_Context.lines}}"
+    register: salidadiff
+
+  - name: Oction Diff Files
+    o4n_diff:
+      original: "./backup/{{ inventory_hostname }}.mongo"
+      current: "./backup/{{inventory_hostname}}_context.master"
+      type_diff: context
+      match_type: var
+      list_char_ignore: [!, #]
       lines_in_context: "{{Service_Model.Diff_Context.lines}}"
     register: salidadiff
 """
@@ -87,6 +103,7 @@ from ansible.module_utils.basic import AnsibleModule
 from datetime import datetime
 from collections import OrderedDict
 import difflib
+import diffios
 
 
 def open_files(_original, _current):
@@ -123,9 +140,9 @@ def open_files(_original, _current):
     return str1, str2, success_origin_current, ret_msg
 
 
-def find_block_of_config_to_modify(_block="", _lines_to_add="", _lines_to_delete=""):
+def find_block_of_config_to_modify(_list_char_ignore, _block="", _lines_to_add="", _lines_to_delete=""):
     ret_msg = ""
-    list_char_ignore = ["!","#"]
+    # list_char_ignore = ["!","#"]
     block_list = _block.splitlines() if _block else []
     new_block_list = [i for i in block_list if not i.startswith("---")] if len(block_list) > 0 else []
     new_block_list = [i for i in new_block_list if not i.startswith("+++")] if len(new_block_list) > 0 else []
@@ -142,7 +159,7 @@ def find_block_of_config_to_modify(_block="", _lines_to_add="", _lines_to_delete
             cmd_in_block = line_in_block[1]
             cmd_in_block_mod = cmd_in_block.replace(cmd_in_block[0], "", 1)
             cmd_in_block_mod_list = [char for char in cmd_in_block_mod if char]
-            exist_ignored_char = [ele for ele in list_char_ignore if ele in cmd_in_block_mod_list]
+            exist_ignored_char = [ele for ele in _list_char_ignore if ele in cmd_in_block_mod_list]
             if cmd_in_block_mod[0] != " " and len(exist_ignored_char) == 0:
                 if mayor_line_not_indented != cmd_in_block_mod:
                     new_lines_to_add.append(cmd_in_block)
@@ -173,7 +190,7 @@ def find_block_of_config_to_modify(_block="", _lines_to_add="", _lines_to_delete
             cmd_in_block = line_in_block[1]
             cmd_in_block_mod = cmd_in_block.replace(cmd_in_block[0], "", 1)
             cmd_in_block_mod_list = [char for char in cmd_in_block_mod if char]
-            exist_ignored_char = [ele for ele in list_char_ignore if ele in cmd_in_block_mod_list]
+            exist_ignored_char = [ele for ele in _list_char_ignore if ele in cmd_in_block_mod_list]
             if cmd_in_block_mod[0] != " " and len(exist_ignored_char) == 0:
                 if mayor_line_not_indented != cmd_in_block_mod:
                     new_lines_to_del.append(cmd_in_block)
@@ -274,15 +291,45 @@ def find_config_diff(_str1: list, _str2: list, _lines_in_context=3):
 
     return salida_json, success, ret_msg
 
+def find_context_var(_current_cfg, _template, _match_type):
+    f = open(_template, 'r')
+    tplt = f.read().strip().splitlines()
+    f.close()
+    salida_json = OrderedDict()
+    delta_results = ""
+    missing_commands = ""
+    difference_commands = ""
+    try:
+      diff = diffios.Compare(_template, _current_cfg)
+      delta_results = diff.delta()
+      missing_commands = diff.pprint_missing()
+      difference_commands = diff.pprint_additional() 
+      if len(missing_commands)<1:
+          salida_json["lines_to_add_config_file"] = ""
+      else:
+          salida_json["lines_to_add_config_file"] = missing_commands.split('\n')
+      salida_json['match_type'] = _match_type
+      salida_json['context_name'] = _template
+      salida_json['original_context'] = tplt
+      salida_json["lines_difference"] = difference_commands.split('\n')
+      salida_json["delta_results"] = delta_results
+      _success = True
+      ret_msg= "Diff algorithm run successfully"  
+    except Exception as error:
+        _success = False
+        ret_msg = f"Diff algorithm failed, error {error}"
+
+    return salida_json, _success, ret_msg
 
 def main():
     module = AnsibleModule(
         argument_spec=dict(
             original=dict(required=True),
-            current=dict(requiered=True),
-            type_diff=dict(requiered=False, type="str", choices=["config", "context"], default="config"),
-            match_type=dict(requiered=False, type="str", choices=["include", "full"], default="full"),
-            lines_in_context=dict(requiered=False,  type="str", default="3")
+            current=dict(required=True),
+            type_diff=dict(required=False, type="str", choices=["config", "context"], default="config"),
+            match_type=dict(required=False, type="str", choices=["include", "full", "var"], default="full"),
+            lines_in_context=dict(required=False,  type="str", default="3"),
+            list_char_ignore=dict(required=False,  type="list", default=["!","#"])
         )
     )
     original = module.params.get("original")
@@ -290,6 +337,7 @@ def main():
     type_diff = module.params.get("type_diff")
     match_type = module.params.get("match_type")
     lines_in_context = int(module.params.get("lines_in_context"))
+    list_char_ignore = module.params.get("list_char_ignore")
 
     # Open Files
     config_orig, config_current, success_origin_current, ret_msg = open_files(original, current)
@@ -307,9 +355,10 @@ def main():
                 lines_to_add_snd = salida_ansible['Diff_Results']['lines_to_add']
                 lines_to_del_snd = salida_ansible['Diff_Results']['lines_to_delete']
                 block_snd = salida_ansible['Diff_Results']['diff']
-                ret_msg, block_lines_to_add, block_lines_to_del = find_block_of_config_to_modify(block_snd,
-                                                                                        lines_to_add_snd,
-                                                                                        lines_to_del_snd)
+                ret_msg, block_lines_to_add, block_lines_to_del = find_block_of_config_to_modify(list_char_ignore,
+                                                                                                 block_snd,
+                                                                                                 lines_to_add_snd,
+                                                                                                 lines_to_del_snd)
                 salida_ansible['Diff_Results']['lines_to_add'] = '\n'.join([cmd[1] for cmd in lines_to_add_snd]) if \
                     len(salida_ansible['Diff_Results']['lines_to_add']) > 0 else False
                 salida_ansible['Diff_Results']['lines_to_delete'] = '\n'.join([cmd[1] for cmd in lines_to_del_snd]) if \
@@ -325,6 +374,8 @@ def main():
                 salida, success, ret_msg = find_context_included(config_orig, config_current, current, match_type)
             elif match_type.lower() == "full":
                 salida, success, ret_msg = find_context_diff(config_orig, config_current, current, match_type, lines_in_context)
+            elif match_type.lower() == "var":
+                salida, success, ret_msg = find_context_var(original, current, match_type)
             if success:
                 salida_ansible["Diff_Results"] = salida
                 salida_ansible["Total_execution_time"] = f"{datetime.now() - starttime}"
