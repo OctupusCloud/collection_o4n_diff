@@ -67,7 +67,7 @@ tasks:
       current: "./backup/{{inventory_hostname}}.config"
       type_diff: config
       lines_in_context: "{{Service_Model.Diff_Context.lines}}"
-       register: salidadiff
+    register: salidadiff
 
   - name: Oction Diff Files
     o4n_diff:
@@ -76,7 +76,7 @@ tasks:
       type_diff: context
       match_type: full
       lines_in_context: "{{Service_Model.Diff_Context.lines}}"
-      register: salidadiff
+    register: salidadiff
 
   - name: Oction Diff Files
     o4n_diff:
@@ -97,6 +97,140 @@ tasks:
       lines_in_context: "{{Service_Model.Diff_Context.lines}}"
     register: salidadiff
 """
+RETURN = """
+output:
+    "description": 
+        - "1_ salida type diff config"
+        - "2_ salida type diff context match full"
+        - "3_ salida type diff context match include"
+        - "4_ salida type diff context match var"
+        - (salidas truncadas)
+    "salidadiff_config": {
+        "msg": "",
+        "content": {
+        "Diff_Results": {
+            "diff": '--- original\n +++ current\n @@ -1,8 +1,8 @@\n Building configuration...\n \n-Current configuration with default configurations exposed ',
+            "lines_to_delete": "+Current configuration with default configurations exposed : 49759 bytes\n",
+            "lines_to_add": "-Current configuration with default configurations exposed : 49852 bytes\n-!\n",
+            "block_to_add": "-Current configuration with default configurations exposed : 49852 bytes\n-ip cef load-sharing algorithm universal CC1B726F\n",
+            "block_to_del": "+Current configuration with default configurations exposed : 49759 bytes\n+ip cef load-sharing algorithm universal ECC34684\n+ipv6",
+            },
+            "Total_execution_time": "0:00:00.016707"
+        }
+    }
+    "salidadiff_common_context_match_full": {
+      "results": [
+        {
+          "msg": "Diff algorithm run successfully",
+          "content": {
+            "Diff_Results": {
+              "match_type": "full",
+              "context_name": "../files/G3_Acceso_Script_general.txt",
+              "original_context": [
+                "no service pad",
+                "",
+                "service timestamps debug datetime msec localtime show-timezone",
+                "service timestamps log datetime msec localtime show-timezone",
+                "service password-encryption",
+                "trunk...",
+              ],
+              "lines_to_add_config_file": [
+                "+",
+                "+service sequence-numbers",
+                "+",
+                "+",
+                "+aaa group server tacacs+ ISET",
+                "+ server name ISET1",
+                "+ server name ISET2",
+                "trunk...",
+              ]
+            },
+            "Total_execution_time": "0:00:00.009611"}
+        }
+        ]
+    }
+    "salidadiff_common_context_match_include": {
+    "results": [
+      {
+        "msg": "Diff algorithm run successfully",
+        "content": {
+          "Diff_Results": {
+            "match_type": "include",
+            "context_name": "../files/G3_Acceso_Script_general.txt",
+            "original_context": [
+              "no service pad",
+              "",
+              "service timestamps debug datetime msec localtime show-timezone",
+              "service timestamps log datetime msec localtime show-timezone",
+              "trunk...",
+            ],
+            "lines_included": {
+              "no service pad": [
+                "Line included in config line: no service pad to-xot",
+                "Line included in config line: no service pad from-xot",
+                "Line included in config line: no service pad cmns",
+                "Line included in config line: no service pad",
+                "trunk...",
+              ],
+              "": [
+                "Line included in config line: Building configuration...",
+                "Line included in config line: ",
+                "Line included in config line: Current configuration with default configurations exposed : 49759 bytes",
+                "Line included in config line: !",
+              ],
+            },
+            "lines_to_add_config_file": [
+              "aaa group server tacacs+ ISET",
+              " server name ISET1",
+              " server name ISET2",
+              "trunk...",
+            ]
+          },
+          "Total_execution_time": "0:00:00.050088"}
+      }
+      ]
+    }
+    "salidadiff_common_context_match_var": {
+      "results": [
+        {
+          "msg": "Diff algorithm run successfully",
+          "content": {
+            "Diff_Results": {
+              "lines_to_add_config_file": "",
+              "match_type": "var",
+              "context_name": "../files/G3_Acceso_Script_general_labo.txt",
+              "original_context": [
+                "no service pad",
+                "",
+                "service timestamps debug datetime msec localtime show-timezone",
+                "service timestamps log datetime msec localtime show-timezone",
+                "service password-encryption",
+                "",
+                "logging buffered 65535 informational",
+                " ",
+                "trunk...",
+              ],
+              "lines_difference": [
+                "* Cisco in writing.                                                      *",
+                "",
+                "Building configuration...",
+                "",
+                "Current configuration with default configurations exposed : 49759 bytes",
+                "",
+                "access-session vlan-assignment ignore-errors",
+                "",
+                "trunk...",
+                "",
+              
+              ],
+              "delta_results": "--- baseline\n+++ comparison\n\n\n+   1: * Cisco in writing.                                                      *\n+   2: * IOSv is strictly limited to use for evaluation, demonstration and IOS  *\n+   3: * Technical Advisory Center. Any use or disclosure, in whole or in part, *\n+   4: * education. IOSv is provided as-is and is not supported by Cisco's      *\n+   5: * of the IOSv Software or Documentation to any third party for any       *\n+   6: * purposes is expressly prohibited except as otherwise authorized by     *\n+   7: **************************************************\n+   8: **************************************************************************\n+   9: **************************************************************************^C\n+  10: Building configuration...\n+  11: Current configuration with default configurations exposed : 49759 bytes\n+  12: access-session vlan-assignment ignore-errors\n+  13: alias exec h help\n+  14: alias exec lo logout\n+  15: alias exec p ping\n+  16: alias exec r resume\n+  17: alias exec s show\n+  18: alias exec u undebug\n+  19: alias exec un undebug\n+  20: alias exec w where\n+  21: archive\n+ trunk...",
+            },
+          "Total_execution_time": "0:00:00.261768",
+          }
+        }
+        ]
+    }
+"""
 
 # Modulos
 from ansible.module_utils.basic import AnsibleModule
@@ -104,6 +238,7 @@ from datetime import datetime
 from collections import OrderedDict
 import difflib
 import diffios
+import re
 
 
 def open_files(_original, _current):
@@ -142,7 +277,6 @@ def open_files(_original, _current):
 
 def find_block_of_config_to_modify(_list_char_ignore, _block="", _lines_to_add="", _lines_to_delete=""):
     ret_msg = ""
-    # list_char_ignore = ["!","#"]
     block_list = _block.splitlines() if _block else []
     new_block_list = [i for i in block_list if not i.startswith("---")] if len(block_list) > 0 else []
     new_block_list = [i for i in new_block_list if not i.startswith("+++")] if len(new_block_list) > 0 else []
@@ -291,6 +425,7 @@ def find_config_diff(_str1: list, _str2: list, _lines_in_context=3):
 
     return salida_json, success, ret_msg
 
+
 def find_context_var(_current_cfg, _template, _match_type):
     f = open(_template, 'r')
     tplt = f.read().strip().splitlines()
@@ -347,7 +482,7 @@ def main():
         starttime = datetime.now()
         salida_ansible = OrderedDict()
         if type_diff.lower() == "config":
-            salida, success, ret_msg = find_config_diff(config_orig, config_current, lines_in_context)
+            salida, success, ret_msg = find_config_diff(config_current, config_orig, lines_in_context)
             # Blocks to modify
             if success:
                 salida_ansible["Diff_Results"] = salida
