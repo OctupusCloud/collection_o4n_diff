@@ -75,7 +75,7 @@ output:
 from ansible.module_utils.basic import AnsibleModule
 from datetime import datetime
 from collections import OrderedDict
-from ansible_collections.manusl_networking.o4n_diff.plugins.module_utils.cregex import RegMatch as cr
+from ansible_collections.octupus.o4n_diff.plugins.module_utils.cregex import RegMatch as cr
 
 def find_regex(_file: str, _exr: str):
     salida_json = OrderedDict()

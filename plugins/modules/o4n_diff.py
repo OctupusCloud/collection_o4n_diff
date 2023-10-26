@@ -482,7 +482,7 @@ def main():
         starttime = datetime.now()
         salida_ansible = OrderedDict()
         if type_diff.lower() == "config":
-            salida, success, ret_msg = find_config_diff(config_current, config_orig, lines_in_context)
+            salida, success, ret_msg = find_config_diff(config_orig, config_current, lines_in_context)
             # Blocks to modify
             if success:
                 salida_ansible["Diff_Results"] = salida
