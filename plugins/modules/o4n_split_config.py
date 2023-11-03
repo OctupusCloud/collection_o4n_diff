@@ -189,14 +189,14 @@ def main():
     # Open Files
     config_orig, success_origin_current, ret_msg = open_files(file_cfg)
     
-    parameter_startf = '\n' + parameter_start
+    parameter_start
     parameter_endf = '\n' + parameter_end
 
     # Get CFG block config
     if success_origin_current:
         starttime = datetime.now()
         salida_ansible = OrderedDict()
-        positions = find_all(config_orig, parameter_startf, parameter_endf)
+        positions = find_all(config_orig, parameter_start, parameter_endf)
         if len(positions) > 1:
             success, ret_msg, file_names, sec_names = find_section_config(positions, parameter_start, keyword, config_orig, path_file, hostname, ext)
             
