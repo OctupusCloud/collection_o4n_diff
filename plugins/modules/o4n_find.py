@@ -13,7 +13,7 @@ description:
   - ejecuta busquedas de patrones en base a expresiones regulares
   - muestra las lineas que coinciden con el patron
   - también indica la posición donde se encontró la coincidencia
-version_added: "3.0"
+version_added: "3.0.4"
 author: "Ed Scrimaglia"
 notes:
   - Testeado en linux
@@ -52,18 +52,21 @@ output:
                 "interface GigabitEthernet0/2"
             ],
             "lines_included_span": {
-                "interface GigabitEthernet0/0": [
-                    "14950",
-                    "14978"
-                ],
-                "interface GigabitEthernet0/1": [
-                    "16117",
-                    "16145"
-                ],
-                "interface GigabitEthernet0/2": [
-                    "18589",
-                    "18617"
-                ]
+              "interface GigabitEthernet0/0": {
+                "start": 14950,
+                "end": 14978,
+                "line": 732
+              },
+              "interface GigabitEthernet0/1": {
+                "start": 16117,
+                "end": 16145,
+                "line": 740
+              },
+              "interface GigabitEthernet0/2": {
+                "start": 18517,
+                "end": 18545,
+                "line": 755
+              }
             },
             "path_file": "../documentacion/modulos/G3_Acceso.device"
         },
@@ -87,7 +90,15 @@ def find_regex(_file: str, _exr: str):
         span = reg.finditer(file)
 
         for match in span:
-            line_inc_dic[match.group()] = match.span()
+            start, end = match.span()
+            # Encontrar el número de línea
+            line_number = sum(1 for i in range(start) if file[i] == '\n') + 1
+
+            line_inc_dic[match.group()] = {
+                'start': start,
+                'end': end,
+                'line': line_number,
+            }
 
         lines_included = reg.findall(file)
 
