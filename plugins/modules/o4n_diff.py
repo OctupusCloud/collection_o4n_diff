@@ -57,6 +57,11 @@ options:
       "lista con caracteres especiales a ignorar en la comparación"
     required: false
     type: list
+  var_diff:
+    description:
+      "diferencia a aplicar a los elementos de las acls, valor entre 0 y 9, predet 5"
+    required: false
+    type: int
 """
 
 EXAMPLES = """
@@ -275,6 +280,22 @@ def open_files(_original, _current):
     return str1, str2, success_origin_current, ret_msg
 
 
+def clr_pos(_strcl:list):
+#this func clean acl position, because in comparision with acl template we can have a same element but different position
+    for line_str in _strcl:
+      positioni = _strcl.index(line_str)
+      if re.match(r"^\s+\d+\s+permit.+$|^\s+\d+\s+deny.+$", line_str):
+          line_strs = line_str.split(' ')
+          for line_sp in line_strs:
+              if line_strs.index(line_sp) == 2:
+                  line_str = ' ' + line_sp
+              elif line_strs.index(line_sp) != 0 or line_strs.index(line_sp) != 1 or line_strs.index(line_sp) != 2:
+                  line_str = line_str + ' ' + line_sp
+          _strcl[positioni] = line_str
+
+    return _strcl
+
+
 def find_block_of_config_to_modify(_list_char_ignore, _block="", _lines_to_add="", _lines_to_delete=""):
     ret_msg = ""
     block_list = _block.splitlines() if _block else []
@@ -426,26 +447,47 @@ def find_config_diff(_str1: list, _str2: list, _lines_in_context=3):
     return salida_json, success, ret_msg
 
 
-def find_context_var(_current_cfg, _template, _match_type):
-    f = open(_template, 'r')
-    tplt = f.read().strip().splitlines()
-    f.close()
+def find_context_var(_str1: list, _str2: list, _context_name: str, _match_type: str, _var=5): #_current_cfg, _template, _match_type, _var
+    tpl = tuple(_str2)
+    _str1 = clr_pos(_str1)
+    _str2c = clr_pos(_str2)
     salida_json = OrderedDict()
     delta_results = ""
     missing_commands = ""
     difference_commands = ""
     try:
-      diff = diffios.Compare(_template, _current_cfg)
+      diff = diffios.Compare(_str2c, _str1)
       delta_results = diff.delta()
       missing_commands = diff.pprint_missing()
-      difference_commands = diff.pprint_additional() 
+      difference_commands = diff.pprint_additional()
+      list_r = missing_commands.split('\n')
       if len(missing_commands)<1:
           salida_json["lines_to_add_config_file"] = ""
       else:
-          salida_json["lines_to_add_config_file"] = missing_commands.split('\n')
+          #with this algorithm we take a relative position of lost element in acl.
+          for line_acl in list_r:
+              if re.match(r"^ip access-list.+|^!", line_acl):
+                  try:
+                      position1 = _str2c.index(line_acl)
+                  except ValueError:
+                      position1 = None
+              if re.match(r".+permit\s+.+|.+deny\s+.+", line_acl) and position1 != None :
+                  position2 = _str2c.index(line_acl)
+                  line_acl_old = line_acl
+                  if position2 < position1:
+                      while position2 < position1:
+                          try:
+                              position2 = _str2c.index(line_acl, position2 + 1)
+                          except ValueError:
+                              break
+                  lineposition = ((position2 - position1) * 10) - _var
+                  line_acl = ' ' + str(lineposition) + ' ' + line_acl
+                  position4 = list_r.index(line_acl_old)
+                  list_r[position4] = line_acl
+          salida_json["lines_to_add_config_file"] = list_r
       salida_json['match_type'] = _match_type
-      salida_json['context_name'] = _template
-      salida_json['original_context'] = tplt
+      salida_json['context_name'] = _context_name
+      salida_json['original_context'] = tpl
       salida_json["lines_difference"] = difference_commands.split('\n')
       salida_json["delta_results"] = delta_results
       _success = True
@@ -464,7 +506,8 @@ def main():
             type_diff=dict(required=False, type="str", choices=["config", "context"], default="config"),
             match_type=dict(required=False, type="str", choices=["include", "full", "var"], default="full"),
             lines_in_context=dict(required=False,  type="str", default="3"),
-            list_char_ignore=dict(required=False,  type="list", default=["!","#"])
+            list_char_ignore=dict(required=False,  type="list", default=["!","#"]),
+            var_diff=dict(required=False,  type="int", choices=[1, 2, 3, 4, 5, 6, 7, 8, 9, 0], default=5)
         )
     )
     original = module.params.get("original")
@@ -473,6 +516,7 @@ def main():
     match_type = module.params.get("match_type")
     lines_in_context = int(module.params.get("lines_in_context"))
     list_char_ignore = module.params.get("list_char_ignore")
+    var_diff = int(module.params.get("var_diff"))
 
     # Open Files
     config_orig, config_current, success_origin_current, ret_msg = open_files(original, current)
@@ -510,7 +554,7 @@ def main():
             elif match_type.lower() == "full":
                 salida, success, ret_msg = find_context_diff(config_orig, config_current, current, match_type, lines_in_context)
             elif match_type.lower() == "var":
-                salida, success, ret_msg = find_context_var(original, current, match_type)
+                salida, success, ret_msg = find_context_var(config_orig, config_current, current, match_type, var_diff)
             if success:
                 salida_ansible["Diff_Results"] = salida
                 salida_ansible["Total_execution_time"] = f"{datetime.now() - starttime}"
