@@ -3,7 +3,7 @@
 ## Octupus Collection
 
 Collection o4n_diff helps developers to take diff with 2 text files.  
-By Ed Scrimaglia - Manuel Saldivar
+By Ed Scrimaglia - Manuel Saldivar - Marcos Schonfeld
 
 ## Required
 
