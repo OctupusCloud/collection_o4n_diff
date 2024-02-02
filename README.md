@@ -2,7 +2,7 @@
 
 ## Octupus Collection
 
-Collection o4n_diff helps developers to take diff with 2 text files.  
+Collection o4n_diff helps developers to find advanced diff in 2 text files.  
 By Ed Scrimaglia - Manuel Saldivar - Marcos Schonfeld
 
 ## Required
@@ -12,7 +12,7 @@ Ansible >= 2.10
 ## Modules
 
 o4n_diff
-The module allows to find and displays the differences between two files in the context of configurartions compliance. o4n_diff works either comparing two configurations files (config) or a block of sentences against a configuration file or a part of a configuration file called contexts (templates).  
+The module allows to find and displays the differences between two files in the context of configurartions compliance. o4n_diff works either comparing two configurations files (config mode) or a block of sentences against a configuration file or a part of a configuration file called contexts (context mode).  
 
 o4n_find
 Based on regular expresions, the module returns words or line of words from a configutation file.  
