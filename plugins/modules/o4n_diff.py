@@ -461,6 +461,38 @@ def find_context_var(_str1: list, _str2: list, _context_name: str, _match_type: 
       missing_commands = diff.pprint_missing()
       difference_commands = diff.pprint_additional()
       list_r = missing_commands.split('\n')
+      #Algorithm to order relative position of output
+      list_rs = []
+      element_princ = {}
+      element_f     = None
+      for element in list_r:
+          if not element.startswith(' '):
+              element_f  = element.rstrip()
+              element_princ[element] = []
+          else:
+              element_princ[element_f].append(element.rstrip())
+      element_princO = {}
+      element_fO     = None
+      for elem in _str2c:
+          if not elem.startswith(' '):
+              element_fO  = elem.rstrip()
+              element_princO[elem] = []
+          else:
+              element_princO[element_fO].append(elem.rstrip())
+
+      for ad in element_princ:
+        if len(ad) > 0:
+            element_princ[ad]= [b for b in element_princO[ad] if b in element_princ[ad]]
+
+      list_rs = [e for e in element_princO if e in element_princ]
+
+      list_r = []
+      for k in list_rs:
+          if k != '':
+              list_r.append(k)
+              for j in element_princ[k]:
+                  list_r.append(j)
+
       if len(missing_commands)<1:
           salida_json["lines_to_add_config_file"] = ""
       else:
