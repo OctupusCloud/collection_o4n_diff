@@ -3,7 +3,7 @@
 ## Octupus Collection
 
 Collection o4n_diff helps developers to find advanced diff in 2 text files.  
-By Ed Scrimaglia - Manuel Saldivar - Marcos Schonfeld
+By Ed Scrimaglia - Manuel Saldivar - Marcos Schonfeld - Randy Rozo
 
 ## Required
 
