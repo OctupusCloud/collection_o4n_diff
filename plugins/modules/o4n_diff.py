@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 from __future__ import (absolute_import, division, print_function)
@@ -24,6 +24,7 @@ requirements:
   - ansible >= 2.10
   - python >= 3.6
   - diffios
+  - Establecer `ansible_python_interpreter` a Python 3 si es necesario.
 options:
   original:
     description:

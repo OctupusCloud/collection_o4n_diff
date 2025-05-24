@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -24,6 +24,8 @@ notes:
   - Tested with Cisco devices
 requirements:
   - ansible >= 2.10
+  - python >= 3.6
+  - Establecer `ansible_python_interpreter` a Python 3 si es necesario.
 options:
   file_cfg:
     description:
